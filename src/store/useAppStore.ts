@@ -4,7 +4,7 @@ import type { WorkloadId } from '../data/workloads';
 export type View = 'explorer' | 'learn';
 export type CardSlots = [string | null, string | null, string | null];
 
-export const INITIAL_CARDS: CardSlots = ['h100-sxm', 'mi300x', 'rtx-pro-6000'];
+export const INITIAL_CARDS: CardSlots = ['l20', 'rtx-pro-6000', 'w7900'];
 
 interface AppState {
   view: View;

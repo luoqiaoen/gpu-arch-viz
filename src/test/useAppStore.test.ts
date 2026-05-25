@@ -17,7 +17,7 @@ describe('useAppStore', () => {
   it('initializes with defaults', () => {
     const s = useAppStore.getState();
     expect(s.view).toBe('explorer');
-    expect(s.selectedCards).toEqual(['h100-sxm', 'mi300x', 'rtx-pro-6000']);
+    expect(s.selectedCards).toEqual(['l20', 'rtx-pro-6000', 'w7900']);
     expect(s.workload).toBe('fp64-sim');
   });
 
@@ -28,7 +28,7 @@ describe('useAppStore', () => {
 
   it('setCard updates only the targeted slot', () => {
     useAppStore.getState().setCard(1, 'mi210');
-    expect(useAppStore.getState().selectedCards).toEqual(['h100-sxm', 'mi210', 'rtx-pro-6000']);
+    expect(useAppStore.getState().selectedCards).toEqual(['l20', 'mi210', 'w7900']);
   });
 
   it('setCard can null a slot', () => {
