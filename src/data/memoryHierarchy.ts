@@ -30,7 +30,7 @@ const BLACKWELL: MemRung[] = [
   { level: 'Registers',       capacity: '256 KB/SM',  bandwidth: '~90 TB/s/SM',   bwNumGBps: null,  latency: '<1 ns',   latencyNs: 0.5 },
   { level: 'Shared / L1',     capacity: '256 KB/SM',  bandwidth: '~40 TB/s/SM',   bwNumGBps: null,  latency: '~4 ns',   latencyNs: 4   },
   { level: 'L2 Cache',        capacity: '~128 MB',    bandwidth: '~7 TB/s',       bwNumGBps: 7000,  latency: '~75 ns',  latencyNs: 75  },
-  { level: 'GDDR7',           capacity: '32–96 GB',   bandwidth: '800–1344 GB/s', bwNumGBps: 1344,  latency: '~600 ns', latencyNs: 600,  external: true },
+  { level: 'GDDR7',           capacity: '32–96 GB',   bandwidth: '896–1792 GB/s', bwNumGBps: 1792,  latency: '~600 ns', latencyNs: 600,  external: true },
   { level: 'PCIe 5.0 → Host', capacity: 'Host RAM',   bandwidth: '128 GB/s',      bwNumGBps: 128,   latency: '~5 µs',   latencyNs: 5000, external: true },
 ];
 
@@ -48,7 +48,7 @@ const CDNA3: MemRung[] = [
   { level: 'LDS (Shared)',     capacity: '64 KB/CU',   bandwidth: '~20 TB/s/CU',   bwNumGBps: null,  latency: '~4 ns',   latencyNs: 4   },
   { level: 'L1 Cache',        capacity: '32 KB/CU',   bandwidth: '~15 TB/s/CU',   bwNumGBps: null,  latency: '~20 ns',  latencyNs: 20  },
   { level: 'L2 per XCD',      capacity: '4 MB/XCD',   bandwidth: '~5 TB/s',       bwNumGBps: 5000,  latency: '~100 ns', latencyNs: 100 },
-  { level: 'HBM3',            capacity: '192 GB',     bandwidth: '5300 GB/s',     bwNumGBps: 5300,  latency: '~350 ns', latencyNs: 350,  external: true },
+  { level: 'HBM3',            capacity: '192 GB',     bandwidth: '5325 GB/s',     bwNumGBps: 5325,  latency: '~350 ns', latencyNs: 350,  external: true },
   { level: 'PCIe 5.0 → Host', capacity: 'Host RAM',   bandwidth: '128 GB/s',      bwNumGBps: 128,   latency: '~5 µs',   latencyNs: 5000, external: true },
 ];
 

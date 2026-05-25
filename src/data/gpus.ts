@@ -64,8 +64,8 @@ export const GPU_SPECS: GpuSpec[] = [
   {
     id: 'rtx-pro-6000', name: 'RTX PRO 6000', vendor: 'nvidia', arch: 'Blackwell', node: 'TSMC 4NP',
     topology: 'monolithic',
-    throughput: { fp64Vector: 2.0, fp64Ratio: 1 / 64, fp32: 125, fp16Dense: 250, fp16Sparse: 500, int8Dense: 1000, int8Sparse: 2000 },
-    memory: { capacityGB: 96, type: 'GDDR7', bandwidthGBs: 1344 },
+    throughput: { fp64Vector: 2.0, fp64Ratio: 1 / 64, fp32: 125, fp16Dense: 1001, fp16Sparse: 2002, int8Dense: 2000, int8Sparse: 4000 },
+    memory: { capacityGB: 96, type: 'GDDR7', bandwidthGBs: 1792 },
     computeUnits: 188, tdpW: 600, priceUSD: 8500,
     die: [
       { kind: 'compute-cluster', count: 12, areaWeight: 38, label: 'SM Array (188 SMs)' },
@@ -79,8 +79,8 @@ export const GPU_SPECS: GpuSpec[] = [
   {
     id: 'rtx-pro-4500', name: 'RTX PRO 4500', vendor: 'nvidia', arch: 'Blackwell', node: 'TSMC 4NP',
     topology: 'monolithic',
-    throughput: { fp64Vector: 0.8, fp64Ratio: 1 / 64, fp32: 51, fp16Dense: 102, fp16Sparse: 204, int8Dense: 408, int8Sparse: 816 },
-    memory: { capacityGB: 32, type: 'GDDR7', bandwidthGBs: 800 },
+    throughput: { fp64Vector: 0.84, fp64Ratio: 1 / 64, fp32: 53.8, fp16Dense: 420, fp16Sparse: 840, int8Dense: 840, int8Sparse: 1680 },
+    memory: { capacityGB: 32, type: 'GDDR7', bandwidthGBs: 896 },
     computeUnits: 82, tdpW: 200, priceUSD: 2600,
     die: [
       { kind: 'compute-cluster', count: 6, areaWeight: 38, label: 'SM Array (82 SMs)' },
@@ -125,7 +125,7 @@ export const GPU_SPECS: GpuSpec[] = [
     topology: 'dual-die',
     throughput: { fp64Vector: 45.3, fp64Matrix: 90.5, fp64Ratio: 1.0, fp32: 45.3, fp16Dense: 362, int8Dense: 362 },
     memory: { capacityGB: 128, type: 'HBM2e', bandwidthGBs: 3200 },
-    computeUnits: 208, tdpW: 560, priceUSD: 12000,
+    computeUnits: 208, tdpW: 500, priceUSD: 12000,
     die: [
       { kind: 'compute-cluster', count: 8, areaWeight: 56, label: 'Compute Units (104 CUs/die)', mfmaIntegrated: true },
       { kind: 'l2', count: 1, areaWeight: 14, label: 'L2 + Infinity Cache' },
@@ -138,7 +138,7 @@ export const GPU_SPECS: GpuSpec[] = [
     id: 'mi300x', name: 'MI300X', vendor: 'amd', arch: 'CDNA3', node: '5+6nm chiplet',
     topology: 'chiplet', chipletCount: 8,
     throughput: { fp64Vector: 81.7, fp64Matrix: 163.4, fp64Ratio: 0.5, fp32: 163.4, fp16Dense: 1307, fp16Sparse: 2614, int8Dense: 2614, int8Sparse: 5229 },
-    memory: { capacityGB: 192, type: 'HBM3', bandwidthGBs: 5300 },
+    memory: { capacityGB: 192, type: 'HBM3', bandwidthGBs: 5325 },
     computeUnits: 304, tdpW: 750, priceUSD: 18000,
     die: [
       { kind: 'compute-cluster', count: 8, areaWeight: 52, label: 'XCD Compute Units (38 CUs each)', mfmaIntegrated: true },
