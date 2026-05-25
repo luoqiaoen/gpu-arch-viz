@@ -133,6 +133,7 @@ Finally, **update the test** in `src/test/gpus.test.ts` to include the new GPU i
 | H100 SXM | NVIDIA | Hopper | 80 GB HBM3 | 989 TFLOPS |
 | RTX PRO 6000 | NVIDIA | Blackwell | 96 GB GDDR7 | 1,001 TFLOPS |
 | RTX PRO 4500 | NVIDIA | Blackwell | 32 GB GDDR7 | 420 TFLOPS |
+| L40 | NVIDIA | Ada Lovelace | 48 GB GDDR6 | 181 TFLOPS |
 | L20 | NVIDIA | Ada Lovelace | 48 GB GDDR6 | 120 TFLOPS |
 | MI300X | AMD | CDNA3 (8 XCDs) | 192 GB HBM3 | 1,307 TFLOPS |
 | MI250 | AMD | CDNA2 (dual-die) | 128 GB HBM2e | 362 TFLOPS |

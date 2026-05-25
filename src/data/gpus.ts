@@ -62,6 +62,21 @@ export const GPU_SPECS: GpuSpec[] = [
     ],
   },
   {
+    id: 'l40', name: 'NVIDIA L40', vendor: 'nvidia', arch: 'Ada Lovelace', node: 'TSMC 4N',
+    topology: 'monolithic',
+    throughput: { fp64Vector: 1.41, fp64Ratio: 1 / 64, fp32: 90.5, fp16Dense: 181, fp16Sparse: 362, int8Dense: 362, int8Sparse: 724 },
+    memory: { capacityGB: 48, type: 'GDDR6', bandwidthGBs: 864 },
+    computeUnits: 142, tdpW: 300, priceUSD: 10000,
+    die: [
+      { kind: 'compute-cluster', count: 10, areaWeight: 42, label: 'SM Array (142 SMs)' },
+      { kind: 'tensor', count: 10, areaWeight: 14, label: 'Tensor Cores (4th Gen)' },
+      { kind: 'l2', count: 1, areaWeight: 16, label: 'L2 Cache (96 MB)' },
+      { kind: 'memCtrl', count: 3, areaWeight: 8, label: 'Memory Controllers' },
+      { kind: 'gddr', count: 6, areaWeight: 12, label: 'GDDR6' },
+      { kind: 'interconnect', count: 1, areaWeight: 8, label: 'PCIe 4.0' },
+    ],
+  },
+  {
     id: 'rtx-pro-6000', name: 'RTX PRO 6000', vendor: 'nvidia', arch: 'Blackwell', node: 'TSMC 4NP',
     topology: 'monolithic',
     throughput: { fp64Vector: 2.0, fp64Ratio: 1 / 64, fp32: 125, fp16Dense: 1001, fp16Sparse: 2002, int8Dense: 2000, int8Sparse: 4000 },
