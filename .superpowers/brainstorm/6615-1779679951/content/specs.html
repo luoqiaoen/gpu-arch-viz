@@ -1,0 +1,64 @@
+<div style="background:#0a0d12;color:#c9d1d9;font-family:'SF Mono',Menlo,monospace;padding:8px;border-radius:8px">
+
+<h2 style="color:#e6edf3">Researched specs — sanity check the data layer</h2>
+<p class="subtitle">7 cards, 4 architectures. Green rows = NVIDIA (dedicated Tensor Cores), red rows = AMD (MFMA in-CU). Flag anything that looks wrong. Tensor/matrix figures are <i>dense</i> (non-sparse); the app will toggle "marketing" sparse numbers separately.</p>
+
+<style>
+  table.spec{border-collapse:collapse;width:100%;font-size:11px;margin-top:8px}
+  table.spec th,table.spec td{border:1px solid #2a323d;padding:5px 6px;text-align:right;white-space:nowrap}
+  table.spec th{background:#161b22;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;font-size:9px;position:sticky;top:0}
+  table.spec td:first-child,table.spec th:first-child{text-align:left}
+  .nv{color:#3fb950}.amd{color:#f85149}
+  .crit{color:#ff7b72;font-weight:bold}
+  .good{color:#7ee787}
+  .muted{color:#6e7681}
+</style>
+
+<div style="overflow-x:auto">
+<table class="spec">
+<tr>
+  <th>Card</th><th>Arch / Node</th><th>FP64</th><th>FP32</th>
+  <th>FP16 Tensor*</th><th>INT8*</th><th>Memory</th><th>BW</th><th>TDP</th><th>~Price</th>
+</tr>
+<tr>
+  <td class="nv">L20</td><td>Ada / 4N</td>
+  <td class="crit">0.9 (1/64)</td><td>59.8</td><td>119.5</td><td>239</td>
+  <td>48 GB GDDR6</td><td>864 GB/s</td><td>275 W</td><td>~$3.5k</td>
+</tr>
+<tr>
+  <td class="nv">RTX PRO 6000</td><td>Blackwell / 4NP</td>
+  <td class="crit">~2.0 (1/64)</td><td>~125</td><td>~250</td><td>~1000</td>
+  <td>96 GB GDDR7</td><td>~1792 GB/s</td><td>600 W</td><td>~$8.5k</td>
+</tr>
+<tr>
+  <td class="nv">RTX PRO 4500</td><td>Blackwell / 4NP</td>
+  <td class="crit">~0.8 (1/64)</td><td>51</td><td>~100</td><td>~400</td>
+  <td>32 GB GDDR7</td><td>800 GB/s</td><td>200 W</td><td>~$2.6k</td>
+</tr>
+<tr>
+  <td class="nv">H100 SXM</td><td>Hopper / 4N</td>
+  <td class="good">34 · 67 mtx</td><td>67</td><td>990</td><td>1979</td>
+  <td>80 GB HBM3</td><td>3350 GB/s</td><td>700 W</td><td>~$30k</td>
+</tr>
+<tr>
+  <td class="amd">MI210</td><td>CDNA2 / N6</td>
+  <td class="good">22.6 · 45 mtx</td><td>22.6</td><td>181</td><td>181</td>
+  <td>64 GB HBM2e</td><td>1600 GB/s</td><td>300 W</td><td>~$12k</td>
+</tr>
+<tr>
+  <td class="amd">MI250</td><td>CDNA2·2-die / N6</td>
+  <td class="good">45.3 · 90 mtx</td><td>45.3</td><td>362</td><td>362</td>
+  <td>128 GB HBM2e</td><td>3200 GB/s</td><td>560 W</td><td>~$12k</td>
+</tr>
+<tr>
+  <td class="amd">MI300X</td><td>CDNA3·chiplet / 5+6nm</td>
+  <td class="good">81.7 · 163 mtx</td><td>163.4</td><td>1307</td><td>2614</td>
+  <td>192 GB HBM3</td><td>5300 GB/s</td><td>750 W</td><td>~$18k</td>
+</tr>
+</table>
+</div>
+
+<p style="font-size:11px;margin-top:8px"><span class="crit">Red FP64</span> = consumer-lineage crippling. Note: real ratio is <b>1/64</b> for Ada/Blackwell (worse than the brief's 1/16) — official FP64 isn't published for these, so it's derived from the architectural ratio. <span class="good">Green FP64</span> = HPC-grade; "mtx" = FP64 matrix rate. AMD vector FP64 = FP32 (true 1:1).</p>
+<p style="font-size:10px" class="muted">* FP16/INT8 shown DENSE. H100/MI300X marketing doubles these via 2:4 sparsity (e.g. H100 → 1979 sparse FP16, 3958 sparse INT8). All numbers are per-package peak theoretical.</p>
+
+</div>
