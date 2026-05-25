@@ -16,7 +16,7 @@ describe('CompareTable', () => {
 
   it('shows all metric rows', () => {
     render(<CompareTable />);
-    for (const row of ['FP64', 'FP32', 'FP16', 'INT8', 'Memory', 'BW', 'TDP', 'Price ($)', 'FP16/$k', 'TFLOPS/W', 'Bottleneck']) {
+    for (const row of ['FP64', 'FP32', 'FP16', 'INT8', 'Memory', 'BW', 'TDP', 'Price ($)', 'FP32/$k', 'FP16/$k', 'TFLOPS/W', 'Bottleneck']) {
       expect(screen.getByText(row)).toBeInTheDocument();
     }
   });

@@ -72,6 +72,16 @@ export function CompareTable() {
             ))}
           </tr>
 
+          {/* FP32 TFLOPS per $1k */}
+          <tr className="hover:bg-[#161b22]">
+            <td className="text-muted px-2 py-1 border border-edge">FP32/$k</td>
+            {specs.map((s) => (
+              <td key={s.id} className="text-right px-2 py-1 border border-edge text-primary">
+                {(s.throughput.fp32 / (effectivePrice(s) / 1000)).toFixed(1)} T
+              </td>
+            ))}
+          </tr>
+
           {/* FP16 TFLOPS per $1k */}
           <tr className="hover:bg-[#161b22]">
             <td className="text-muted px-2 py-1 border border-edge">FP16/$k</td>
