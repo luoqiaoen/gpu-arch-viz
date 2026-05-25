@@ -47,5 +47,5 @@ export const useAppStore = create<AppState>((set) => ({
 }));
 
 export function selectedSpecIds(cards: CardSlots): string[] {
-  return cards.filter((c): c is string => c !== null);
+  return [cards[0], cards[1], cards[2]].filter((c): c is string => c !== null);
 }
