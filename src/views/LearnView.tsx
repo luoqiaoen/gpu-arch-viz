@@ -20,8 +20,13 @@ export function LearnView() {
             Four mental models that explain why a spec sheet doesn't tell you how fast your code will run:
             compute vs bandwidth bound, cache levels, latency hiding via occupancy, and access coalescing.
           </p>
-          <label className="font-mono text-xs text-muted flex items-center gap-2 mt-2">
-            Focus card
+        </header>
+
+        <section><RooflineChart cardIds={cards} /></section>
+        <section><PrecisionFormats /></section>
+        <section>
+          <label className="font-mono text-xs text-muted flex items-center gap-2 mb-3">
+            GPU
             <select
               aria-label="learn card"
               value={learnCard}
@@ -31,11 +36,8 @@ export function LearnView() {
               {GPU_SPECS.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
           </label>
-        </header>
-
-        <section><RooflineChart cardIds={cards} /></section>
-        <section><PrecisionFormats /></section>
-        <section><MemoryHierarchy cardId={learnCard} /></section>
+          <MemoryHierarchy cardId={learnCard} />
+        </section>
         <section><WarpScheduler /></section>
         <section><AccessPatterns /></section>
       </div>
