@@ -79,7 +79,7 @@ export function MemoryHierarchy({ cardId }: { cardId: string }) {
       </div>
       <p className="font-mono text-[10px] text-muted leading-relaxed">
         Each step down is bigger but slower. Once working data spills past L2, every access pays the external-memory tax —
-        this is exactly where HBM3 ({spec.arch.startsWith('CDNA') ? 'AMD' : 'NVIDIA'} HPC parts) crushes GDDR6/7.
+        this is exactly where HBM3 ({spec.vendor === 'amd' ? 'AMD' : 'NVIDIA'} HPC parts) crushes GDDR6/7.
       </p>
     </div>
   );

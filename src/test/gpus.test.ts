@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { GPU_SPECS, GPU_MAP } from '../data/gpus';
 
 describe('GPU_SPECS', () => {
-  it('contains all 7 cards', () => {
+  it('contains all 9 cards', () => {
     expect(GPU_SPECS.map((g) => g.id).sort()).toEqual(
-      ['h100-sxm', 'l20', 'mi210', 'mi250', 'mi300x', 'rtx-pro-4500', 'rtx-pro-6000'].sort(),
+      ['h100-sxm', 'l20', 'mi210', 'mi250', 'mi300x', 'rtx-pro-4500', 'rtx-pro-6000', 'w7800', 'w7900'].sort(),
     );
   });
 

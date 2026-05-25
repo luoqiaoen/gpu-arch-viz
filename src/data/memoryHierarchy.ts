@@ -34,6 +34,16 @@ const BLACKWELL: MemRung[] = [
   { level: 'PCIe 5.0 → Host', capacity: 'Host RAM',   bandwidth: '128 GB/s',      bwNumGBps: 128,   latency: '~5 µs',   latencyNs: 5000, external: true },
 ];
 
+const RDNA3: MemRung[] = [
+  { level: 'Registers',        capacity: '~2 MB total', bandwidth: '~50 TB/s/CU',   bwNumGBps: null,  latency: '<1 ns',   latencyNs: 0.5 },
+  { level: 'LDS (Shared)',      capacity: '64 KB/CU',   bandwidth: '~10 TB/s/CU',   bwNumGBps: null,  latency: '~5 ns',   latencyNs: 5   },
+  { level: 'L1 Cache',         capacity: '~3 MB',       bandwidth: '~5 TB/s/WGP',   bwNumGBps: null,  latency: '~20 ns',  latencyNs: 20  },
+  { level: 'L2 Cache',         capacity: '6 MB',        bandwidth: '~3 TB/s',       bwNumGBps: 3000,  latency: '~100 ns', latencyNs: 100 },
+  { level: 'Infinity Cache',   capacity: '64–96 MB',    bandwidth: '~2.7 TB/s',     bwNumGBps: 2700,  latency: '~200 ns', latencyNs: 200 },
+  { level: 'GDDR6',            capacity: '32–48 GB',    bandwidth: '576–864 GB/s',  bwNumGBps: 864,   latency: '~600 ns', latencyNs: 600,  external: true },
+  { level: 'PCIe 4.0 → Host',  capacity: 'Host RAM',    bandwidth: '64 GB/s',       bwNumGBps: 64,    latency: '~6 µs',   latencyNs: 6000, external: true },
+];
+
 const CDNA2: MemRung[] = [
   { level: 'Registers',       capacity: '256 KB/CU',  bandwidth: '~60 TB/s/CU',   bwNumGBps: null,  latency: '<1 ns',   latencyNs: 0.5 },
   { level: 'LDS (Shared)',     capacity: '64 KB/CU',   bandwidth: '~15 TB/s/CU',   bwNumGBps: null,  latency: '~5 ns',   latencyNs: 5   },
@@ -56,6 +66,7 @@ const BY_ARCH: Record<string, MemRung[]> = {
   Hopper: HOPPER,
   'Ada Lovelace': ADA,
   Blackwell: BLACKWELL,
+  'RDNA 3': RDNA3,
   CDNA2: CDNA2,
   CDNA3: CDNA3,
 };
