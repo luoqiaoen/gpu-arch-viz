@@ -26,9 +26,10 @@ interface Props {
 }
 
 export const IMAGE_PRESETS = [
-  { label: '2048×1024', w: 2048, h: 1024 },
-  { label: '3072×1536', w: 3072, h: 1536 },
-  { label: '4096×2160', w: 4096, h: 2160 },
+  { label: '1024×2048',  w: 1024, h: 2048  },
+  { label: '1536×3072',  w: 1536, h: 3072  },
+  { label: '2048×4096',  w: 2048, h: 4096  },
+  { label: '4096×8192',  w: 4096, h: 8192  },
 ];
 
 function fmtFlops(n: number): string {

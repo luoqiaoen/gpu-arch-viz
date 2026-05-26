@@ -52,11 +52,10 @@ export interface ConvOp {
   color: string;
 }
 
-// Pure image convolution presets — C_in/C_out reflect image channel counts
-// (grayscale=1, RGB=3), not CNN feature map depths.
+// Pure grayscale image convolution presets (C_in=C_out=1).
 export const CONV_OPS: ConvOp[] = [
-  { id: 'k3-gray',  label: '3×3 Grayscale (C=1→1)',  shortLabel: '3×3 G',  kSize: 3,  cIn: 1, cOut: 1, color: '#79c0ff' },
-  { id: 'k7-rgb',   label: '7×7 RGB (C=3→3)',         shortLabel: '7×7 R',  kSize: 7,  cIn: 3, cOut: 3, color: '#ffa657' },
-  { id: 'k11-rgb',  label: '11×11 RGB (C=3→3)',        shortLabel: '11×11',  kSize: 11, cIn: 3, cOut: 3, color: '#ff7b72' },
-  { id: 'k15-rgb',  label: '15×15 RGB (C=3→3)',        shortLabel: '15×15',  kSize: 15, cIn: 3, cOut: 3, color: '#d2a8ff' },
+  { id: 'k3',   label: '3×3 kernel',   shortLabel: '3×3',   kSize: 3,  cIn: 1, cOut: 1, color: '#79c0ff' },
+  { id: 'k7',   label: '7×7 kernel',   shortLabel: '7×7',   kSize: 7,  cIn: 1, cOut: 1, color: '#ffa657' },
+  { id: 'k11',  label: '11×11 kernel', shortLabel: '11×11', kSize: 11, cIn: 1, cOut: 1, color: '#ff7b72' },
+  { id: 'k15',  label: '15×15 kernel', shortLabel: '15×15', kSize: 15, cIn: 1, cOut: 1, color: '#d2a8ff' },
 ];

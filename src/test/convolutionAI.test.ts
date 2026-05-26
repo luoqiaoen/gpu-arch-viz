@@ -47,25 +47,26 @@ describe('convolutionAI', () => {
     expect(convAI(p, 'fp32', 'tiled')).toBeGreaterThan(convAI(p, 'fp32', 'naive'));
   });
 
-  // Image-processing preset validation (C=grayscale or RGB, not CNN feature maps)
-  it('3×3 grayscale tiled at 2MP is memory-bound (AI ≈ 2.2)', () => {
-    const p = { imageW: 2048, imageH: 1024, kSize: 3, cIn: 1, cOut: 1 };
+  // Grayscale image convolution preset validation (C_in=C_out=1)
+  it('3×3 grayscale tiled is memory-bound (AI ≈ 2.25)', () => {
+    const p = { imageW: 1024, imageH: 2048, kSize: 3, cIn: 1, cOut: 1 };
     expect(convAI(p, 'fp32', 'tiled')).toBeCloseTo(2.25, 1);
   });
 
-  it('7×7 RGB tiled at 2MP is AI ≈ 36.7 (memory-bound on most GPUs)', () => {
-    const p = { imageW: 2048, imageH: 1024, kSize: 7, cIn: 3, cOut: 3 };
-    expect(convAI(p, 'fp32', 'tiled')).toBeCloseTo(36.7, 0);
+  it('7×7 grayscale tiled AI ≈ 12.25 (memory-bound)', () => {
+    const p = { imageW: 1024, imageH: 2048, kSize: 7, cIn: 1, cOut: 1 };
+    expect(convAI(p, 'fp32', 'tiled')).toBeCloseTo(12.25, 0);
   });
 
-  it('11×11 RGB tiled is compute-bound territory (AI > 80)', () => {
-    const p = { imageW: 2048, imageH: 1024, kSize: 11, cIn: 3, cOut: 3 };
-    expect(convAI(p, 'fp32', 'tiled')).toBeGreaterThan(80);
-  });
-
-  it('15×15 RGB tiled has higher AI than 11×11 (larger kernel = more compute reuse)', () => {
-    const p11 = { imageW: 2048, imageH: 1024, kSize: 11, cIn: 3, cOut: 3 };
-    const p15 = { imageW: 2048, imageH: 1024, kSize: 15, cIn: 3, cOut: 3 };
+  it('15×15 grayscale tiled has higher AI than 11×11 (larger kernel = more reuse)', () => {
+    const p11 = { imageW: 1024, imageH: 2048, kSize: 11, cIn: 1, cOut: 1 };
+    const p15 = { imageW: 1024, imageH: 2048, kSize: 15, cIn: 1, cOut: 1 };
     expect(convAI(p15, 'fp32', 'tiled')).toBeGreaterThan(convAI(p11, 'fp32', 'tiled'));
+  });
+
+  it('grayscale AI is image-size independent for large images', () => {
+    const small = { imageW: 1024, imageH: 2048, kSize: 11, cIn: 1, cOut: 1 };
+    const large = { imageW: 4096, imageH: 8192, kSize: 11, cIn: 1, cOut: 1 };
+    expect(convAI(large, 'fp32', 'tiled')).toBeCloseTo(convAI(small, 'fp32', 'tiled'), 1);
   });
 });
