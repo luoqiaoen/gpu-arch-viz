@@ -1,15 +1,36 @@
-import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
-import { GPU_MAP } from '../data/gpus';
+import { GPU_MAP, type GpuSpec } from '../data/gpus';
 import { achievableThroughput, WORKLOAD_POINTS } from '../lib/roofline';
 import { useAppStore } from '../store/useAppStore';
 import { WORKLOADS } from '../data/workloads';
 import type { AiPoint } from './ConvolutionCalc';
 
+export type RooflinePrec = 'fp32' | 'fp16' | 'int8' | 'fp64';
+
 const X_POINTS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
 
-export function RooflineChart({ cardIds, aiPoints = [] }: { cardIds: string[]; aiPoints?: AiPoint[] }) {
-  const [precision, setPrecision] = useState<'fp32' | 'fp64'>('fp32');
+const CEIL_OPTIONS: { key: RooflinePrec; label: string }[] = [
+  { key: 'fp32', label: 'FP32' },
+  { key: 'fp16', label: 'FP16' },
+  { key: 'int8', label: 'INT8' },
+  { key: 'fp64', label: 'FP64' },
+];
+
+function getCeilingGFLOPS(s: GpuSpec, prec: RooflinePrec): number {
+  if (prec === 'fp16') return s.throughput.fp16Dense * 1000;
+  if (prec === 'int8') return s.throughput.int8Dense * 1000;
+  if (prec === 'fp64') return s.throughput.fp64Vector * 1000;
+  return s.throughput.fp32 * 1000;
+}
+
+interface Props {
+  cardIds: string[];
+  aiPoints?: AiPoint[];
+  precision?: RooflinePrec;
+  onPrecisionChange?: (p: RooflinePrec) => void;
+}
+
+export function RooflineChart({ cardIds, aiPoints = [], precision = 'fp32', onPrecisionChange }: Props) {
   const specs = cardIds.map((id) => GPU_MAP[id]).filter(Boolean);
   const { workload } = useAppStore();
   const activeWl = WORKLOADS[workload];
@@ -17,8 +38,7 @@ export function RooflineChart({ cardIds, aiPoints = [] }: { cardIds: string[]; a
   const data = X_POINTS.map((ai) => {
     const row: Record<string, number> = { ai };
     for (const s of specs) {
-      const ceilingGFLOPS = (precision === 'fp32' ? s.throughput.fp32 : s.throughput.fp64Vector) * 1000;
-      row[s.id] = achievableThroughput(ai, ceilingGFLOPS, s.memory.bandwidthGBs);
+      row[s.id] = achievableThroughput(ai, getCeilingGFLOPS(s, precision), s.memory.bandwidthGBs);
     }
     return row;
   });
@@ -28,15 +48,15 @@ export function RooflineChart({ cardIds, aiPoints = [] }: { cardIds: string[]; a
       <div className="flex items-center gap-3 flex-wrap">
         <span className="font-mono text-xs text-muted uppercase tracking-widest">Roofline</span>
         <div className="flex gap-1">
-          {(['fp32', 'fp64'] as const).map((p) => (
+          {CEIL_OPTIONS.map(({ key, label }) => (
             <button
-              key={p}
-              onClick={() => setPrecision(p)}
+              key={key}
+              onClick={() => onPrecisionChange?.(key)}
               className={`font-mono text-[10px] px-2 py-0.5 rounded border ${
-                precision === p ? 'bg-nvidia text-bg border-nvidia' : 'text-muted border-edge hover:border-nvidia'
+                precision === key ? 'bg-nvidia text-bg border-nvidia' : 'text-muted border-edge hover:border-nvidia'
               }`}
             >
-              {p.toUpperCase()} ceiling
+              {label}
             </button>
           ))}
         </div>
@@ -98,17 +118,16 @@ export function RooflineChart({ cardIds, aiPoints = [] }: { cardIds: string[]; a
             {/* Convolution calculator dots: one per op × GPU, sitting on each roofline curve */}
             {aiPoints.flatMap((pt) =>
               specs.map((s) => {
-                const ceilGFLOPS = (precision === 'fp32' ? s.throughput.fp32 : s.throughput.fp64Vector) * 1000;
-                const y = achievableThroughput(pt.ai, ceilGFLOPS, s.memory.bandwidthGBs);
+                const y = achievableThroughput(pt.ai, getCeilingGFLOPS(s, precision), s.memory.bandwidthGBs);
                 return (
                   <ReferenceDot
                     key={`${pt.id}-${s.id}`}
                     x={pt.ai}
                     y={y}
-                    r={5}
-                    fill={pt.color}
-                    stroke="#0d1117"
-                    strokeWidth={1.5}
+                    r={pt.hollow ? 4 : 5}
+                    fill={pt.hollow ? '#0d1117' : pt.color}
+                    stroke={pt.color}
+                    strokeWidth={pt.hollow ? 2 : 1.5}
                   />
                 );
               })
@@ -118,7 +137,8 @@ export function RooflineChart({ cardIds, aiPoints = [] }: { cardIds: string[]; a
       </div>
       <p className="font-mono text-[10px] text-muted leading-relaxed">
         Below each card's ridge point, throughput is capped by memory bandwidth (the rising diagonal); above it, by compute (the flat ceiling).
-        Switch to FP64 to watch the consumer-lineage ceilings collapse ~64×.
+        FP16/INT8 use tensor-core dense ceilings — often 8–16× higher than FP32.
+        The precision here is synced with the Conv Calc below: changing precision there moves the dots AND the ceiling simultaneously.
       </p>
     </div>
   );

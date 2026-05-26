@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { GPU_MAP, type GpuSpec } from '../data/gpus';
 import {
   CONV_OPS, convAI, convFlops, convBytesTiled, convBytesNaive,
+  convSeparableFlops, convSeparableBytesTiled, convSeparableAI,
   type ConvPrecision, type ConvOp,
 } from '../lib/convolutionAI';
 import { achievableThroughput } from '../lib/roofline';
+import type { GpuSpec } from '../data/gpus';
 
 export interface AiPoint {
   id: string;
@@ -12,6 +14,7 @@ export interface AiPoint {
   shortLabel: string;
   ai: number;
   color: string;
+  hollow?: boolean;
 }
 
 interface Props {
@@ -44,9 +47,14 @@ function fmtBytes(n: number): string {
   return `${(n / 1e3).toFixed(0)} KB`;
 }
 
-function calcMpxPerSec(ai: number, op: ConvOp, imgW: number, imgH: number, spec: GpuSpec): number {
-  const ceilGFLOPS = spec.throughput.fp32 * 1000;
-  const achievable = achievableThroughput(ai, ceilGFLOPS, spec.memory.bandwidthGBs);
+function ceilingGFLOPS(spec: GpuSpec, prec: ConvPrecision): number {
+  if (prec === 'fp16') return spec.throughput.fp16Dense * 1000;
+  if (prec === 'int8') return spec.throughput.int8Dense * 1000;
+  return spec.throughput.fp32 * 1000;
+}
+
+function calcMpxPerSec(ai: number, op: ConvOp, imgW: number, imgH: number, spec: GpuSpec, prec: ConvPrecision): number {
+  const achievable = achievableThroughput(ai, ceilingGFLOPS(spec, prec), spec.memory.bandwidthGBs);
   const flopsPerPx = convFlops({ imageW: imgW, imageH: imgH, kSize: op.kSize, cIn: op.cIn, cOut: op.cOut }) / (imgW * imgH);
   return (achievable * 1e9) / flopsPerPx / 1e6;
 }
@@ -64,12 +72,22 @@ export function ConvolutionCalc({ cardIds, imgIdx, prec, reuse, setImgIdx, setPr
     return { id: op.id, label: op.label, shortLabel: op.shortLabel, ai: convAI(p, prec, reuse), color: op.color };
   });
 
+  const sepPoints: AiPoint[] = CONV_OPS.map((op) => {
+    const p = { imageW: img.w, imageH: img.h, kSize: op.kSize, cIn: op.cIn, cOut: op.cOut };
+    return { id: `${op.id}-sep`, label: `${op.label} separable`, shortLabel: `${op.shortLabel}→sep`, ai: convSeparableAI(p, prec), color: op.color, hollow: true };
+  });
+
   useEffect(() => {
     const img = IMAGE_PRESETS[imgIdx];
-    onPointsChange(CONV_OPS.map((op) => {
+    const pts = CONV_OPS.map((op) => {
       const p = { imageW: img.w, imageH: img.h, kSize: op.kSize, cIn: op.cIn, cOut: op.cOut };
       return { id: op.id, label: op.label, shortLabel: op.shortLabel, ai: convAI(p, prec, reuse), color: op.color };
-    }));
+    });
+    const sep = CONV_OPS.map((op) => {
+      const p = { imageW: img.w, imageH: img.h, kSize: op.kSize, cIn: op.cIn, cOut: op.cOut };
+      return { id: `${op.id}-sep`, label: `${op.label} separable`, shortLabel: `${op.shortLabel}→sep`, ai: convSeparableAI(p, prec), color: op.color, hollow: true };
+    });
+    onPointsChange([...pts, ...sep]);
   // onPointsChange is stable setState — intentionally omitted
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgIdx, prec, reuse]);
@@ -114,14 +132,18 @@ export function ConvolutionCalc({ cardIds, imgIdx, prec, reuse, setImgIdx, setPr
         </div>
       </div>
 
-      {/* Op legend with live AI values */}
+      {/* Op legend with live AI values — dense and separable side by side */}
       <div className="flex flex-wrap gap-x-6 gap-y-1">
-        {points.map((pt) => (
+        {points.map((pt, i) => (
           <span key={pt.id} className="font-mono text-[10px] flex items-center gap-1.5">
             <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: pt.color }} />
             <span className="text-muted">{pt.label}</span>
             <span className="text-primary font-semibold">
               AI={pt.ai < 1 ? pt.ai.toFixed(2) : pt.ai.toFixed(1)}
+            </span>
+            <span className="text-muted">sep→</span>
+            <span style={{ color: pt.color }}>
+              {sepPoints[i].ai < 1 ? sepPoints[i].ai.toFixed(2) : sepPoints[i].ai.toFixed(1)}
             </span>
           </span>
         ))}
@@ -160,6 +182,22 @@ export function ConvolutionCalc({ cardIds, imgIdx, prec, reuse, setImgIdx, setPr
             </div>
             <div className="mt-1">
               <span className="text-primary">AI</span> = FLOPs / Bytes
+            </div>
+            <div className="mt-2 border-t border-[#21262d] pt-1">
+              <span className="text-primary">Separable (K×1 + 1×K):</span>
+            </div>
+            <div>
+              <span className="text-primary">FLOPs (sep)</span>
+              {' '}= 4 × H×W × K
+              <span className="text-[9px] text-[#484f58] ml-2">↳ K/2 speedup vs dense</span>
+            </div>
+            <div>
+              <span className="text-primary">Bytes (sep)</span>
+              {' '}= (3×H×W + 2K) × bpe
+              <span className="text-[9px] text-[#484f58] ml-2">↳ input + intermediate + output + 2 kernels</span>
+            </div>
+            <div className="text-[9px] pl-4 text-[#484f58]">
+              ↳ AI_sep ≈ 4K / (3×bpe) for large images — more memory bound than dense despite fewer FLOPs
             </div>
           </div>
 
@@ -246,7 +284,8 @@ export function ConvolutionCalc({ cardIds, imgIdx, prec, reuse, setImgIdx, setPr
             <tbody>
               {points.map((pt, i) => {
                 const op = CONV_OPS[i];
-                return (
+                const spt = sepPoints[i];
+                return [
                   <tr key={pt.id} className="hover:bg-[#161b22]">
                     <td className="px-2 py-0.5 border border-edge" style={{ color: pt.color }}>
                       {op.label}
@@ -256,11 +295,24 @@ export function ConvolutionCalc({ cardIds, imgIdx, prec, reuse, setImgIdx, setPr
                     </td>
                     {specs.map((s) => (
                       <td key={s.id} className="text-right px-2 py-0.5 border border-edge text-primary">
-                        {calcMpxPerSec(pt.ai, op, img.w, img.h, s).toFixed(0)} MP/s
+                        {calcMpxPerSec(pt.ai, op, img.w, img.h, s, prec).toFixed(0)} MP/s
                       </td>
                     ))}
-                  </tr>
-                );
+                  </tr>,
+                  <tr key={spt.id} className="hover:bg-[#161b22] opacity-70">
+                    <td className="px-2 py-0.5 border border-edge" style={{ color: spt.color }}>
+                      {op.shortLabel} sep
+                    </td>
+                    <td className="text-right text-muted px-2 py-0.5 border border-edge">
+                      {spt.ai < 1 ? spt.ai.toFixed(2) : spt.ai.toFixed(1)}
+                    </td>
+                    {specs.map((s) => (
+                      <td key={s.id} className="text-right px-2 py-0.5 border border-edge text-muted">
+                        {calcMpxPerSec(spt.ai, op, img.w, img.h, s, prec).toFixed(0)} MP/s
+                      </td>
+                    ))}
+                  </tr>,
+                ];
               })}
             </tbody>
           </table>
@@ -270,7 +322,8 @@ export function ConvolutionCalc({ cardIds, imgIdx, prec, reuse, setImgIdx, setPr
       <p className="font-mono text-[10px] text-muted leading-relaxed">
         <span className="text-primary">Tiled</span>: weights in shared memory, input streamed once — AI scales with K²×C.
         {' '}<span className="text-primary">Naive</span>: weights re-read per output pixel — AI collapses to ≈1/bpe regardless of kernel size.
-        Throughput (MP/s) uses FP32 ceiling. Dots on the roofline above mark each operation.
+        {' '}<span className="text-primary">Sep</span>: K×K → K×1+1×K; fewer FLOPs (K/2× cheaper) but intermediate buffer makes it more memory-bound.
+        Throughput uses {prec.toUpperCase()} ceiling. Filled dots = dense, hollow = separable on the roofline above.
       </p>
     </div>
   );

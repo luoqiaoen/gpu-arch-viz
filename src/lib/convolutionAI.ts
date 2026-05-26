@@ -42,6 +42,29 @@ export function convAI(
   return convFlops(p) / bytes;
 }
 
+/**
+ * Separable convolution: decomposes K×K into K×1 + 1×K passes.
+ * Each pass costs 2×H×W×K FLOPs (for C_in=C_out=1 grayscale).
+ * Total = 4×H×W×K vs 2×H×W×K² for dense → speedup ratio = K/2.
+ */
+export function convSeparableFlops(p: ConvParams): number {
+  return 4 * p.imageW * p.imageH * p.kSize * p.cIn;
+}
+
+/**
+ * Tiled bytes for separable: input + intermediate buffer (C_in channels) + output + two 1D kernels.
+ * For large images: AI_sep ≈ 4K / (3 × bpe).
+ */
+export function convSeparableBytesTiled(p: ConvParams, prec: ConvPrecision): number {
+  const bpe = BPE[prec];
+  const px = p.imageW * p.imageH;
+  return (3 * px * p.cIn + 2 * p.kSize * p.cIn) * bpe;
+}
+
+export function convSeparableAI(p: ConvParams, prec: ConvPrecision): number {
+  return convSeparableFlops(p) / convSeparableBytesTiled(p, prec);
+}
+
 export interface ConvOp {
   id: string;
   label: string;

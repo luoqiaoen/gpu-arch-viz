@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore, selectedSpecIds } from '../store/useAppStore';
 import { GPU_SPECS } from '../data/gpus';
-import { RooflineChart } from '../learn/RooflineChart';
+import { RooflineChart, type RooflinePrec } from '../learn/RooflineChart';
 import { PrecisionFormats } from '../learn/PrecisionFormats';
 import { MemoryHierarchy } from '../learn/MemoryHierarchy';
 import { WarpScheduler } from '../learn/WarpScheduler';
 import { AccessPatterns } from '../learn/AccessPatterns';
+import { TilingDepth } from '../learn/TilingDepth';
 import { ConvolutionCalc, type AiPoint } from '../learn/ConvolutionCalc';
 import type { ConvPrecision } from '../lib/convolutionAI';
 
@@ -20,6 +21,10 @@ export function LearnView() {
   const [prec, setPrec] = useState<ConvPrecision>('fp32');
   const [reuse, setReuse] = useState<'tiled' | 'naive'>('tiled');
 
+  // Roofline ceiling precision — synced with conv calc precision to close the loop
+  const [rooflinePrec, setRooflinePrec] = useState<RooflinePrec>('fp32');
+  useEffect(() => { setRooflinePrec(prec); }, [prec]);
+
   return (
     <div className="h-full overflow-auto">
       <div className="max-w-4xl mx-auto p-6 flex flex-col gap-10">
@@ -31,7 +36,7 @@ export function LearnView() {
           </p>
         </header>
 
-        <section><RooflineChart cardIds={cards} aiPoints={aiPoints} /></section>
+        <section><RooflineChart cardIds={cards} aiPoints={aiPoints} precision={rooflinePrec} onPrecisionChange={setRooflinePrec} /></section>
         <section>
           <ConvolutionCalc
             cardIds={cards}
@@ -40,6 +45,7 @@ export function LearnView() {
             onPointsChange={setAiPoints}
           />
         </section>
+        <section><TilingDepth prec={prec} /></section>
         <section><PrecisionFormats /></section>
         <section>
           <label className="font-mono text-xs text-muted flex items-center gap-2 mb-3">

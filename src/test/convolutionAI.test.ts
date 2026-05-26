@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { convFlops, convBytesTiled, convBytesNaive, convAI } from '../lib/convolutionAI';
+import { convFlops, convBytesTiled, convBytesNaive, convAI, convSeparableFlops, convSeparableBytesTiled, convSeparableAI } from '../lib/convolutionAI';
 
 const BASE = { imageW: 2048, imageH: 1024, kSize: 3, cIn: 3, cOut: 16 };
 
@@ -68,5 +68,26 @@ describe('convolutionAI', () => {
     const small = { imageW: 1024, imageH: 2048, kSize: 11, cIn: 1, cOut: 1 };
     const large = { imageW: 4096, imageH: 8192, kSize: 11, cIn: 1, cOut: 1 };
     expect(convAI(large, 'fp32', 'tiled')).toBeCloseTo(convAI(small, 'fp32', 'tiled'), 1);
+  });
+
+  // Separable convolution tests
+  it('separable FLOPs = (2/K) × dense FLOPs (K/2 compute speedup)', () => {
+    const p = { imageW: 1024, imageH: 512, kSize: 7, cIn: 1, cOut: 1 };
+    expect(convSeparableFlops(p)).toBe(convFlops(p) * 2 / p.kSize);
+  });
+
+  it('separable tiled AI < dense tiled AI (intermediate buffer adds bytes)', () => {
+    const p = { imageW: 2048, imageH: 1024, kSize: 7, cIn: 1, cOut: 1 };
+    expect(convSeparableAI(p, 'fp32')).toBeLessThan(convAI(p, 'fp32', 'tiled'));
+  });
+
+  it('separable tiled AI converges to 4K/(3×bpe) for large images (fp32)', () => {
+    const p = { imageW: 4096, imageH: 8192, kSize: 11, cIn: 1, cOut: 1 };
+    expect(convSeparableAI(p, 'fp32')).toBeCloseTo(4 * 11 / (3 * 4), 1);
+  });
+
+  it('separable fp16 bytes are exactly half of fp32 bytes', () => {
+    const p = { imageW: 1024, imageH: 512, kSize: 7, cIn: 1, cOut: 1 };
+    expect(convSeparableBytesTiled(p, 'fp32') / convSeparableBytesTiled(p, 'fp16')).toBe(2);
   });
 });

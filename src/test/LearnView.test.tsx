@@ -8,10 +8,11 @@ describe('LearnView', () => {
     useAppStore.setState({ learnCard: 'h100-sxm' });
   });
 
-  it('renders all six learn sections', () => {
+  it('renders all seven learn sections', () => {
     render(<LearnView />);
     expect(screen.getAllByText(/Roofline/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Convolution Calculator/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tiling Depth/i)).toBeInTheDocument();
     expect(screen.getByText(/Floating-Point Formats/i)).toBeInTheDocument();
     expect(screen.getByText(/Memory Hierarchy/i)).toBeInTheDocument();
     expect(screen.getByText(/Warp Scheduler/i)).toBeInTheDocument();
