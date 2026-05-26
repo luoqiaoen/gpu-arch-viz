@@ -6,7 +6,6 @@ import {
   type ConvPrecision, type ConvOp,
 } from '../lib/convolutionAI';
 import { achievableThroughput } from '../lib/roofline';
-import type { GpuSpec } from '../data/gpus';
 
 export interface AiPoint {
   id: string;
