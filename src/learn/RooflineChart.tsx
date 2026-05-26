@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
 import { GPU_MAP } from '../data/gpus';
 import { achievableThroughput, WORKLOAD_POINTS } from '../lib/roofline';
 import { useAppStore } from '../store/useAppStore';
 import { WORKLOADS } from '../data/workloads';
+import type { AiPoint } from './ConvolutionCalc';
 
 const X_POINTS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
 
-export function RooflineChart({ cardIds }: { cardIds: string[] }) {
+export function RooflineChart({ cardIds, aiPoints = [] }: { cardIds: string[]; aiPoints?: AiPoint[] }) {
   const [precision, setPrecision] = useState<'fp32' | 'fp64'>('fp32');
   const specs = cardIds.map((id) => GPU_MAP[id]).filter(Boolean);
   const { workload } = useAppStore();
@@ -94,6 +95,24 @@ export function RooflineChart({ cardIds }: { cardIds: string[] }) {
                 offset: 4,
               }}
             />
+            {/* Convolution calculator dots: one per op × GPU, sitting on each roofline curve */}
+            {aiPoints.flatMap((pt) =>
+              specs.map((s) => {
+                const ceilGFLOPS = (precision === 'fp32' ? s.throughput.fp32 : s.throughput.fp64Vector) * 1000;
+                const y = achievableThroughput(pt.ai, ceilGFLOPS, s.memory.bandwidthGBs);
+                return (
+                  <ReferenceDot
+                    key={`${pt.id}-${s.id}`}
+                    x={pt.ai}
+                    y={y}
+                    r={5}
+                    fill={pt.color}
+                    stroke="#0d1117"
+                    strokeWidth={1.5}
+                  />
+                );
+              })
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>

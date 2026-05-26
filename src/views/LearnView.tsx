@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAppStore, selectedSpecIds } from '../store/useAppStore';
 import { GPU_SPECS } from '../data/gpus';
 import { RooflineChart } from '../learn/RooflineChart';
@@ -5,11 +6,19 @@ import { PrecisionFormats } from '../learn/PrecisionFormats';
 import { MemoryHierarchy } from '../learn/MemoryHierarchy';
 import { WarpScheduler } from '../learn/WarpScheduler';
 import { AccessPatterns } from '../learn/AccessPatterns';
+import { ConvolutionCalc, type AiPoint } from '../learn/ConvolutionCalc';
+import type { ConvPrecision } from '../lib/convolutionAI';
 
 export function LearnView() {
   const { learnCard, setLearnCard, selectedCards } = useAppStore();
   const rooflineCards = selectedSpecIds(selectedCards);
   const cards = rooflineCards.length > 0 ? rooflineCards : ['h100-sxm'];
+
+  // Convolution calculator state lifted here so RooflineChart can receive the points
+  const [aiPoints, setAiPoints] = useState<AiPoint[]>([]);
+  const [imgIdx, setImgIdx] = useState(0);
+  const [prec, setPrec] = useState<ConvPrecision>('fp32');
+  const [reuse, setReuse] = useState<'tiled' | 'naive'>('tiled');
 
   return (
     <div className="h-full overflow-auto">
@@ -22,7 +31,15 @@ export function LearnView() {
           </p>
         </header>
 
-        <section><RooflineChart cardIds={cards} /></section>
+        <section><RooflineChart cardIds={cards} aiPoints={aiPoints} /></section>
+        <section>
+          <ConvolutionCalc
+            cardIds={cards}
+            imgIdx={imgIdx} prec={prec} reuse={reuse}
+            setImgIdx={setImgIdx} setPrec={setPrec} setReuse={setReuse}
+            onPointsChange={setAiPoints}
+          />
+        </section>
         <section><PrecisionFormats /></section>
         <section>
           <label className="font-mono text-xs text-muted flex items-center gap-2 mb-3">
