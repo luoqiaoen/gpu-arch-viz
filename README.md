@@ -46,11 +46,15 @@ npx tsc --noEmit   # type-check
 
 | Section | What it teaches |
 |---------|----------------|
-| Roofline model | Per-GPU compute/bandwidth ceilings on a log-log chart; active workload highlighted |
+| Roofline model | Per-GPU compute/bandwidth ceilings on a log-log chart; FP32/FP16/INT8/FP64 ceiling toggle; convolution op dots auto-placed on each roofline curve |
+| Convolution calculator | Arithmetic intensity for grayscale K×K convolution (3×3 → 15×15); tiled vs naive cache modes; separable decomposition (K×K → K×1+1×K); live dense vs separable AI in legend; per-GPU throughput table in MP/s; expandable "Show math" panel with formulas and worked numbers |
+| Tiling depth & halo overhead | Visualizes how tile size T affects AI: a T×T output tile loads a (T+K-1)² input patch; charts show AI vs T converging to K²/bpe asymptote, and halo waste % vs T; reference table at T=8/16/32 |
 | Floating-point formats | Stacked bit-field bars for FP64 → INT8; sign / exponent / mantissa breakdown |
 | Memory hierarchy | Bandwidth cliff bar chart (log scale) + latency ladder from registers to PCIe |
 | Warp scheduler | Occupancy simulator — adjust thread block size and register pressure |
 | Memory access patterns | Coalesced vs strided access animation |
+
+**Precision loop:** changing precision in the convolution calculator (FP32 / FP16 / INT8) simultaneously shifts the AI values (bpe changes bytes) *and* switches the roofline ceiling to the matching tensor-core rate, showing both effects together.
 
 ---
 
